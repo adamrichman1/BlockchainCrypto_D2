@@ -26,7 +26,7 @@ class Block {
         StringBuilder transList = new StringBuilder();
         StringBuilder sb = new StringBuilder();
         for (Transaction transaction: transactions) {
-            if (size + transaction.getSize() > 16) {
+            if (size + transaction.getSize() >= 16) {
 //                System.out.println("$$$ Current block size: " + size);
 //                System.out.println("$$$ Excluding transaction: " + transaction.getSize());
                 continue;
@@ -41,6 +41,8 @@ class Block {
         // Add coinbase transaction
         sb.append(";1333dGpHU6gQShR596zbKHXEeSihdtoyLb>").append(reward);
         transList.append(";1333dGpHU6gQShR596zbKHXEeSihdtoyLb>").append(reward);
+        size++;
+
         transactionList = transList.toString();
 //        System.out.println("Block size: " + size);
 //        System.out.println("Block reward: " + reward);

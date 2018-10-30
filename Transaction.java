@@ -27,10 +27,10 @@ public class Transaction implements Comparable<Transaction> {
 
     @Override
     public int compareTo(Transaction transaction) {
-        if (reward < transaction.getReward()) {
+        if (reward/size < transaction.getReward()/transaction.getSize()) {
             return 1;
         }
-        else if (reward > transaction.getReward()) {
+        else if (reward/size > transaction.getReward()/transaction.getSize()) {
             return -1;
         }
         return 0;
