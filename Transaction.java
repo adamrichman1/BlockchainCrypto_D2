@@ -2,10 +2,10 @@ public class Transaction implements Comparable<Transaction> {
 
     private int reward;
     private String transaction;
-    private int input = 0;
-    private int output = 0;
+    private int size;
 
     Transaction(String transaction, String[] inputs, String[] outputs) {
+        int input = 0, output = 0;
         for (String in: inputs) {
             input += Integer.parseInt(in.split(">")[1]);
         }
@@ -13,11 +13,16 @@ public class Transaction implements Comparable<Transaction> {
             output += Integer.parseInt(out.split(">")[1]);
         }
         reward = input - output;
+        size = inputs.length + outputs.length;
         this.transaction = transaction;
     }
 
-    private int getReward() {
+    int getReward() {
         return reward;
+    }
+
+    int getSize() {
+        return size;
     }
 
     @Override

@@ -7,8 +7,6 @@ import java.util.Scanner;
 
 public class Mine {
 
-    private static String blockchain;
-
     public static void main(String[] args) {
         if (args.length != 3) {
             System.err.println(">>> ERROR: Run program with java Mine *candidate_transaction_file* *difficulty* *prev_hash*");
@@ -20,9 +18,8 @@ public class Mine {
 
         Arrays.sort(transactions);
         System.out.println("$$$ Sorted transactions based on miner reward");
-        System.out.println(Arrays.toString(transactions));
-
-        mine(transactions, args[1]);
+        Block block = new Block(transactions, args[2], new BigInteger(args[1], 16));
+        mine(block);
         System.out.println("$$$ Successfully mined block");
     }
 
@@ -45,52 +42,48 @@ public class Mine {
         }
     }
 
-    private static void addBlock(String block) {
-
-    }
-
-    private static void mine(Transaction[] transactions, String difficulty) {
-        String nonce = "1234";
-        StringBuilder blockBuilder = new StringBuilder();
-        for (Transaction transaction: transactions) {
-            blockBuilder.append(transaction.toString());
-        }
-        String block = Sha256Hash.calculateHash(blockBuilder.toString());
-        BigInteger target = new BigInteger(difficulty, 16);
+    private static void mine(Block block) {
+        String nonce = "0000";
+        BigInteger target = new BigInteger("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16)
+                .divide(block.getDifficulty());
         boolean lookingForTarget = true;
-        String concat;
-        BigInteger hash;
 
         BigInteger numHashes = new BigInteger("0");
-        long startTime = System.nanoTime();
 
         // Keep looping until we find target...
         while (lookingForTarget) {
             // Increment number of hashes tried
             numHashes = numHashes.add(BigInteger.ONE);
             // Concatenate our nonce and our block
-            concat = (leftPad(nonce, 64)) + block;
 
             // Uncomment to see failed attempts
             // System.out.println("Trying: " + concat);
 
             // Calculate the hash.  Kept in a BigInteger since we will want to compare it.
-            hash = Sha256Hash.hashBigInteger(concat);
+            block.buildBlock(nonce);
 
             // If our hash is less than the target, we have succeeded
-            if (hash.compareTo(target) == -1) {
-                long endTime = System.nanoTime();
-                printHashRate(numHashes, startTime, endTime);
+            if (block.getHash().compareTo(target) < 0) {
                 lookingForTarget = false;
-                System.out.println("Nonce       = " + nonce);
-                System.out.println("Full block  = " + concat);
-                System.out.println("Hash(block) = " + leftPad(hash.toString(16), 64));
-            } else {
+                System.out.println("CANDIDATE BLOCK - Hash: " + block.getHash().toString());
+                System.out.println("1. Prev hash: " + block.getPrevHash());
+                System.out.println("2. Block size (< 16): " + block.getSize());
+                System.out.println("3. Current timestamp: " + block.getTimestamp());
+                System.out.println("4. Difficulty: " + block.getDifficulty());
+                System.out.println("5. Nonce: " + nonce);
+                System.out.println("6. Concat Root: " + block.getConcat(nonce));
+                System.out.println("7. List of Transactions:\n" + block.getTransactionList());
+            }
+            else {
                 // Uncomment to see failed attempts
                 // System.out.println("Fail, hash "
                 //            + leftPad(hash.toString(16), 64) + " >= "
                 //            + leftPad(target.toString(16), 64));
                 nonce = incrementStringNonce(nonce);
+                if (nonce.length() != 4) {
+                    System.out.println(">>> ERROR: Nonce = " + nonce);
+                    System.exit(1);
+                }
             }
         }
     }
@@ -104,9 +97,17 @@ public class Mine {
      * @return nonce incremented by one in string form
      */
     private static String incrementStringNonce(String nonce) {
-        BigInteger bi = new BigInteger(nonce, 16);
-        bi = bi.add(BigInteger.ONE);
-        return bi.toString(16);
+        char[] chars = nonce.toCharArray();
+
+        for (int i = chars.length-1; i >= 0; i--) {
+            if (chars[i] < 126) {
+                chars[i]++;
+                return String.valueOf(chars);
+            } else {
+                chars[i] = 32;
+            }
+        }
+        return String.valueOf(chars);
     }
 
     /**
