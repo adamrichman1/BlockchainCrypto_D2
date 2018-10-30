@@ -71,7 +71,7 @@ public class Mine {
                 System.out.println("3. Current timestamp: " + block.getTimestamp());
                 System.out.println("4. Difficulty: " + block.getDifficulty());
                 System.out.println("5. Nonce: " + nonce);
-                System.out.println("6. Concat Root: " + block.getConcat(nonce));
+                System.out.println("6. Concat Root: " + block.getConcatRoot());
                 System.out.println("7. List of Transactions:\n" + block.getTransactionList());
             }
             else {

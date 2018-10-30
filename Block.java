@@ -61,8 +61,8 @@ class Block {
         return difficulty;
     }
 
-    public String getConcat(String nonce) {
-        return prevHash + numTransactions + timestamp + difficulty + nonce + concatRoot;
+    public String getConcatRoot() {
+        return concatRoot;
     }
 
     public int getSize() {
